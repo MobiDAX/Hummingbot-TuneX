@@ -18,17 +18,17 @@ docker pull gitlab.tunex.io:5050/reference-project/hummingbot-tunex
 
 ## Preparing barong api_keys
 
-1. Turn on 2FA for user
+1. Turn on 2FA for user 
 
-![2FA](https://gitlab.tunex.io/trading-bot/hummingbot/-/raw/master/images/profile_mobiweb.jpg)
+![2FA](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/raw/master/images/profile_mobiweb.jpg)
 
 2. Create new api_key
 
-![add key](https://gitlab.tunex.io/trading-bot/hummingbot/-/raw/master/images/keys_mobiweb.jpg)
+![add key](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/raw/master/images/keys_mobiweb.jpg)
 
 3. Save key and secret
 
-![add key](https://gitlab.tunex.io/trading-bot/hummingbot/-/raw/master/images/key_mobiweb.jpg)
+![add key](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/raw/master/images/key_mobiweb.jpg)
 
 ## Connect bot to openware
 
