@@ -1,0 +1,14 @@
+version: '3.6'
+
+services:
+    hummingbot:
+        image: docker.pkg.github.com/tunex-io/hummingbot/internal-hummingbot:0.0.1
+        container_name: hummingbot
+        volumes:
+            - ../conf:/conf
+            - ../logs:/logs
+        environment:
+            - STRATEGY=pure_market_making
+            - CONFIG_FILE_NAME=conf_pure_market_making_strategy_0.yml
+            - CONFIG_PASSWORD=gfhjkm
+
