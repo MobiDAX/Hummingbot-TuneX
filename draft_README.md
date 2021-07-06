@@ -188,7 +188,6 @@ docker run -it --name container_name \
 Important! Remember password which you input during configurating process
 
 ## Running bot
-
 ```
 docker run -itd \
     -e STRATEGY="pure_market_making" \
@@ -201,3 +200,115 @@ docker run -itd \
     --restart "always" \
     --log-opt max-size=10m --log-opt max-file=5 \
     gitlab.tunex.io:5050/reference-project/hummingbot-tunex:0.22
+```
+
+## Running bot in swarm
+
+Notice: it must be initialized docker swarm before
+
+1. Use all previos steps to deploy bots
+
+2. Create  directory:
+
+```
+-- /pathTo/container_name
+    |
+    --- /conf_swarm
+
+```
+and copy into **conf_swarm** all files from /pathTo/container_name/conf
+
+3. Create **bots.yaml.erb** inside /pathTo/templates/compose wth all strategys for all markets You have (it’s number of various conf_pure_market.yml inside /pathTo/container_name/conf_swarm)
+You should create services for easch market strategy inside bots.yaml.erb and configure: image, volumes, environment, deploy for each other.
+**Important:** write label name for the node of swarm where bots wil be running in (for example: [node.labels.status == bots] )
+
+```
+    deploy: 
+        placement:
+            constraints:  [node.labels.status == bots]
+
+```
+ 
+For example, You have markets strategy for 3 pairs (eth-usd,btc-usdt,eth-btc) and use one strategy for each pair, so Your file will looks like:
+
+
+```
+version: '3.6'
+
+services:
+  bot-ethusd-0:
+    image: gitlab.tunex.io:5050/trading-bot/hummingbot:0.22
+    restart: always
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../config/hummingbot/conf_swarm/:/conf/
+      - ../config/hummingbot/logs/:/logs/
+    environment:
+      - STRATEGY=pure_market_making
+      - CONFIG_FILE_NAME=conf_eth-usd_0.yml
+      - CONFIG_PASSWORD=password
+    
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+      placement:
+        constraints: [node.labels.status == bots]
+
+  
+  bot-btc-usdt-0:
+    image: gitlab.tunex.io:5050/trading-bot/hummingbot:0.22
+    restart: always
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../config/hummingbot/conf_swarm/:/conf/
+      - ../config/hummingbot/logs/:/logs/
+    environment:
+      - STRATEGY=pure_market_making
+      - CONFIG_FILE_NAME=conf_btc-usdt_0.yml
+      - CONFIG_PASSWORD=password
+      
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+      placement:
+        constraints: [node.labels.status == bots]
+
+  bot-ethbtc-0:
+    image: gitlab.tunex.io:5050/trading-bot/hummingbot:0.22
+    restart: always
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../config/hummingbot/conf_swarm/:/conf/
+      - ../config/hummingbot/logs/:/logs/
+    environment:
+      - STRATEGY=pure_market_making
+      - CONFIG_FILE_NAME=conf_eth-btc_0.yml
+      - CONFIG_PASSWORD=password
+      
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+      placement:
+        constraints: [node.labels.status == bots]
+```
+4. Take list of nodes in swarm:
+```
+   docker node ls
+```
+add label to one of the node:
+
+```
+   docker node update --label-add status=bots [node-name]
+```
+
+5. Run bots:
+
+```
+   docker stack deploy -c compose/bots.yaml [node-name]
+```
