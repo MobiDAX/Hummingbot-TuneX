@@ -22,9 +22,11 @@ docker pull gitlab.tunex.io:5050/reference-project/hummingbot-tunex:0.22
 
 ### Preparing barong api_keys
 
-Use setter of your **opendax-project** for next steps
+Create new bot-trading user and create adjustments for currencies from all markets which be traded
 
-1. Turn on 2FA for user that will be used as bot
+Use MobiDAX of your **opendax-project** for next steps
+
+1. Turn on 2FA for bot-trading user that will be used as bot
 
 ![2FA](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/raw/master/images/profile_mobiweb.jpg)
 
