@@ -14,7 +14,7 @@ Login to private Docker registry first using your Gitlab account credentials:
 docker login gitlab.tunex.io:5050 
 ```
 
-Pull 0.22 version run following command:
+At node which be used for bots pull 0.22 version using following command:
 
 ```
 docker pull gitlab.tunex.io:5050/reference-project/hummingbot-tunex:0.22
