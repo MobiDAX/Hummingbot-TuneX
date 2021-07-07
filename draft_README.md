@@ -45,7 +45,7 @@ Change with your data and copy conf_global.yml and conf_pure_market.yml in conf 
 
    1.1 Copy conf directory [templates](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/tree/master/templates/conf_0.22) to **config/hummingbot/conf_swarm**.
    
-   Create 3 or more strategy (*.yaml file) for each pairs on opendax-project trading market inside 
+   Create 3 or more strategy (*.yml file) for each pairs on opendax-project trading market inside 
    **conf_swarm** based on template file ```conf_pure_market.yml```
 
    For convinient the strategy can be named like "conf_eth-eur_0.yml" for the pair eth-eur (of cource if it used on trading 
