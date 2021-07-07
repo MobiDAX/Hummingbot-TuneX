@@ -1,24 +1,30 @@
-# HummingBot with Peatio Adapter v.0.22
+# HummingBot deploy in swarm
 
-Assuming, that you have Docker installed https://docs.docker.com/get-docker/
+## Prerequisites
 
-## Getting Docker image
+Assuming, that you have Docker in swarm mode: https://docs.docker.com/engine/swarm/
+
+IMPORTANT: Suppose you have **opendax-project** deployed from gitlab.tunex.io (should be used your own project name)
+
+### Getting Docker image
 
 Login to private Docker registry first using your Gitlab account credentials:
 
 ```
-docker login gitlab.tunex.io:5050
+docker login gitlab.tunex.io:5050 
 ```
 
-If you want to pull latest version run following command:
+Pull 0.22 version run following command:
 
 ```
-docker pull gitlab.tunex.io:5050/reference-project/hummingbot-tunex
+docker pull gitlab.tunex.io:5050/reference-project/hummingbot-tunex:0.22
 ```
 
-## Preparing barong api_keys
+### Preparing barong api_keys
 
-1. Turn on 2FA for user 
+Use setter of your **opendax-project** for next steps
+
+1. Turn on 2FA for user that will be used as bot
 
 ![2FA](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/raw/master/images/profile_mobiweb.jpg)
 
@@ -30,195 +36,45 @@ docker pull gitlab.tunex.io:5050/reference-project/hummingbot-tunex
 
 ![add key](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/raw/master/images/key_mobiweb.jpg)
 
-## Connect bot to openware
+### Configuring bots
 
-1. Create directories for configuration's, database's and log's file:
-
-```
-mkdir logs
-mkdir conf
-mkdir data
-```
-
-2. Start bot for manage secure configuration:
-
-```
-docker run -it --name config_bot \
-    --mount "type=bind,source=/pathTo/container_name/conf,destination=/conf/" \
-    --mount "type=bind,source=/pathTo/container_name/logs,destination=/logs/" \
-    --mount "type=bind,source=/pathTo/container_name/data,destination=/data/" \
-    gitlab.tunex.io:5050/reference-project/hummingbot-tunex
-```
-
-3. Using command ```connect openware``` add api key and api/ranger urls in configuration. Close hummingbot ```exit``` and remove docker container ```docker rm config_bot```.
-
-4. Change with your data and copy conf_global.yml and conf_pure_market.yml in conf directory [templates](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/tree/master/templates/conf_0.22)
-
-## Running resulting bot
-
-```
-docker run -itd \
-    -e STRATEGY="pure_market_making" \
-    -e CONFIG_FILE_NAME="conf_pure_market.yml" \
-    -e CONFIG_PASSWORD="password" \
-    --name container_name \
-    --mount "type=bind,source=/pathTo/container_name/conf,destination=/conf/" \
-    --mount "type=bind,source=/pathTo/container_name/logs,destination=/logs/" \
-    --mount "type=bind,source=/pathTo/container_name/data,destination=/data/" \
-    --restart "always" \
-    --log-opt max-size=10m --log-opt max-file=5 \
-    gitlab.tunex.io:5050/reference-project/hummingbot-tunex
-```
+Change with your data and copy conf_global.yml and conf_pure_market.yml in conf directory templates
+1. Create **config/hummingbot/conf_swarm** where will be configuring *.*yaml files; create **config/hummingbot/logs** and  **config/hummingbot/data**
 
 
-## Pure market making strategy config
+   1.1 Copy conf directory [templates](https://gitlab.tunex.io/reference-project/hummingbot-tunex/-/tree/master/templates/conf_0.22)
+   to **config/hummingbot/conf_swarm**. Create strategy (*.*yaml file) for each pairs on opendax-project trading market inside 
+   **conf_swarm** using conf_pure_market.yml template
+
+   For convinient the strategy can be named like "conf_eth-eur_0.yml" for the pair eth-eur (of cource if it used on trading 
+   market)
+
+   1.2 Configure conf_global.yml template and write params:
+    trading_pair_splitter 
+    key_file_path 
+    log_file_path 
+
+    
+    for trading_pair_splitter all values used on trading market with split '|'; 
+    example: ```trading_pair_splitter: ETH|USD|BTC|OZTG|USDT|EUR ```
+    for key_file_path must be: 
+    ```key_file_path: conf_swarm/ ``` as created folder
+    write ```log_file_path: logs/```  
+
+
+2. Start bot for manage secure configuration
 
 ```
-# Exchange and token parameters
-maker_market: openware
-maker_market_trading_pair: ETH-EUR
-
-# size of each order
-order_amount: 7.17
-
-# How far away from mid price to place the bid order
-# Expressed in decimals : 0.01 = 1% away from mid price at that time
-# Example if mid price is 100 and bid_place threshold is 0.01
-# Your bid is placed at 99
-bid_place_threshold: 0.0001
-
-# How far away from mid price to place the ask order
-# Expressed in decimals : 0.01 = 1% away from mid price at that time
-# Example if mid price is 100 and ask_place threshold is 0.01
-ask_place_threshold: 0.0001
-
-# Ox ONLY - Sets the expiration of limit orders. Minimum is 130 seconds.
-expiration_seconds: 130.0
-
-# Time in seconds before cancelling and rerunning strategy
-# If tick size is 60, the bot cancels active orders and reruns after a minute
-# Your bid is placed at 101
-cancel_order_wait_time: 32.0
-
-# If you want to have single or multiple bids and asks on each side
-mode: multiple
-
-# If you have multiple orders number of orders you want to place on one side of the orderbook
-number_of_orders: 5
-
-# Size of the first bid and ask order for multiple order mode
-order_start_size: 7.17
-
-# Increment size of consecutive orders after the first order in multiple order mode
-order_step_size: 1.42
-
-# Spacing between orders in multiple order mode
-order_interval_percent: 0.0001
-
-# Toggle enabling of Inventory skew
-inventory_skew_enabled: true
-
-# Target base asset inventory percentage target to be maintained
-inventory_target_base_percent: 0.5
-
-# How long to wait before placing the next order in case your order gets filled for single order mode
-filled_order_replenish_wait_time: 30.0
-
-# Do you want to stop cancellations of orders on the other side when one side is filled
-enable_order_filled_stop_cancellation: true
-
-# Do you want to enable best bid ask jumping mode
-best_bid_ask_jump_mode: false
-
-# If best_bid_ask_jump_mode is True, what is the depth in base currency to be used for finding top bid and ask
-best_bid_ask_jump_orders_depth: 0.0
-
-# Parameter to enable/disable adding transaction costs to order prices
-add_transaction_costs: false
-
-# If external price source will be used for the mid price, true or false.
-external_pricing_source: true
-
-# The type of external pricing source (exchange/feed/custom_api).
-external_price_source_type: exchange
-
-# An external exchange name (for external exchange pricing source)
-# IMPORTANT: this eschange must be have exactly exchange
-external_price_source_exchange: coinbase_pro
-
-# A base asset (for external feed pricing source), e.g. ETH
-external_price_source_feed_base_asset:
-
-# A quote asset (for external feed pricing source), e.g. USD
-external_price_source_feed_quote_asset:
-
-# An external api that returns price (for external custom_api pricing source)
-external_price_source_custom_api:
-
-# Include orders that will immediately match on the exchange? (Default is False)
-include_matching_orders: true
+docker run -it --name namebot --mount "type=bind,source=$(pwd)/conf,destination=/conf/" --mount "type=bind,source=$(pwd)/logs,destination=/logs/" --mount "type=bind,source=$(pwd)/data,destination=/data/" gitlab.tunex.io:5050/reference-project/hummingbot-tunex:0.22
 ```
+where namebot is bot name  due to conf_namebot.yaml - > for example: ```docker run -it --name eth-eur_0 --mount ...``` due to conf_eth-eur_0.yaml
 
-## Creating configuration files
+3. Using command ```connect openware``` (due to parameter maker_market in conf_pure_market.yml ) add api key and api/ranger urls in configuration. Close hummingbot ```exit``` and remove docker container ```docker rm config_bot```.
 
-1. Create directory:
 
-```
--- /pathTo/container_name
-    |
-    --- /conf
-    |
-    --- /data
-    |
-    --- /logs
-```
+## Configuring for running bots in swarm
 
-2. Run bot with keeping STDIN open and allocating a pseudo-TTY
-
-```
-docker run -it --name container_name \
-    --mount "type=bind,source=/pathTo/container_name/conf,destination=/conf/" \
-    --mount "type=bind,source=/pathTo/container_name/logs,destination=/logs/" \
-    --mount "type=bind,source=/pathTo/container_name/data,destination=/data/" \
-    gitlab.tunex.io:5050/reference-project/hummingbot-tunex:0.22
-```
-
-3. In bot graphic interface enter ```config``` and input all param values
-
-Important! Remember password which you input during configurating process
-
-## Running bot
-```
-docker run -itd \
-    -e STRATEGY="pure_market_making" \
-    -e CONFIG_FILE_NAME="conf_pure_market_making_strategy_0.yml" \
-    -e CONFIG_PASSWORD="password" \
-    --name container_name \
-    --mount "type=bind,source=/pathTo/container_name/conf,destination=/conf/" \
-    --mount "type=bind,source=/pathTo/container_name/logs,destination=/logs/" \
-    --mount "type=bind,source=/pathTo/container_name/data,destination=/data/" \
-    --restart "always" \
-    --log-opt max-size=10m --log-opt max-file=5 \
-    gitlab.tunex.io:5050/reference-project/hummingbot-tunex:0.22
-```
-
-## Running bot in swarm
-
-Notice: it must be initialized docker swarm before
-
-1. Use all previos steps to deploy bots
-
-2. Create  directory:
-
-```
--- /pathTo/container_name
-    |
-    --- /conf_swarm
-
-```
-and copy into **conf_swarm** all files from /pathTo/container_name/conf
-
-3. Create **bots.yaml.erb** inside /pathTo/templates/compose wth all strategys for all markets You have (it’s number of various conf_pure_market.yml inside /pathTo/container_name/conf_swarm)
+3. Create **bots.yaml.erb** inside /opendax-project/templates/compose wth all strategys for all markets You have (it’s number of various conf_pure_market.yml inside /pathTo/container_name/conf_swarm)
 You should create services for easch market strategy inside bots.yaml.erb and configure: image, volumes, environment, deploy for each other.
 **Important:** write label name for the node of swarm where bots wil be running in (for example: [node.labels.status == bots] )
 
