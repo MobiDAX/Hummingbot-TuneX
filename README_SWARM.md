@@ -69,7 +69,7 @@ Change with your data and copy conf_global.yml and conf_pure_market.yml in conf 
     
     for key_file_path must be: 
     
-    ```key_file_path: conf_swarm/ ``` as created folder
+    ```key_file_path: conf/ ``` 
     
     write ```log_file_path: logs/```  
 
